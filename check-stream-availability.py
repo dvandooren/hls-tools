@@ -74,6 +74,15 @@ def render_date_iso8601():
     return timestamp
 # enddef render_date_iso8601()
 
+def print_brief(args, out_stream, *items):
+    output = ' '.join(map(str, items))
+    if args.verbose or args.timestamp:
+        print >> out_stream, render_date_iso8601(), output
+    else:
+        print >> out_stream, output
+
+# endef print_brief()
+
 # This function sets the return code only if the new code is worse
 def set_return_code(return_code, new_code):
     return new_code if return_code < new_code else return_code
@@ -141,47 +150,20 @@ def main():
 
                     if not args.verbose:
                         if result[0] == 0:
-                            if args.timestamp:
-                                print >> sys.stdout, render_date_iso8601(), "OK:", result[1]
-                            else:
-                                print >> sys.stdout, "OK:", result[1]
+                            print_brief(args, sys.stdout, "OK:", result[1])
                         elif result[0] == 1:
-                            if args.timestamp:
-                                print >> sys.stdout, render_date_iso8601(), "WARNING:", result[1]
-                            else:
-                                print >> sys.stdout, "WARNING:", result[1]
+                            print_brief(args, sys.stdout, "WARNING:", result[1])
                         else:
-                            if args.timestamp:
-                                print >> sys.stdout, render_date_iso8601(), "CRITICAL:", result[1]
-                            else:
-                                print >> sys.stdout, "CRITICAL:", result[1]
+                            print_brief(args, sys.stdout, "CRITICAL:", result[1])
 
                 else:
-                    if args.verbose:
-                        print >> sys.stdout, render_date_iso8601(), "CRITICAL: URL=", url, ">> Does not contain any streams"
-                    else:
-                        if args.timestamp:
-                            print >> sys.stdout, render_date_iso8601(), "CRITICAL: URL=", url, ">> Does not contain any streams"
-                        else:
-                            print >> sys.stdout, "CRITICAL: URL=", url, ">> Does not contain any streams"
+                    print_brief(args, sys.stdout, "CRITICAL: URL=", url, ">> Does not contain any streams")
                     result_code = 2
             except IOError as error:
-                if args.verbose:
-                    print >> sys.stdout, render_date_iso8601(), "CRITICAL:", render_date_iso8601(), "URL=", url, ">>", error
-                else:
-                    if args.timestamp:
-                        print >> sys.stdout, render_date_iso8601(), "CRITICAL: URL=", url, ">>", error
-                    else:
-                        print >> sys.stdout, "CRITICAL: URL=", url, ">>", error
+                print_brief(args, sys.stdout, "CRITICAL: URL=", url, ">>", error)
                 result_code = 2
         else:
-            if args.verbose:
-                print >> sys.stdout, render_date_iso8601(), "CRITICAL: URL=", url, ">> Not a valid URL"
-            else:
-                if args.timestamp:
-                    print >> sys.stdout, render_date_iso8601(), "CRITICAL: URL=", url, ">> Not a valid URL"
-                else:
-                    print >> sys.stdout, "CRITICAL: URL=", url, ">> Not a valid URL"
+            print_brief(args, sys.stdout, "CRITICAL: URL=", url, ">> Not a valid URL")
             result_code = 2
 
     if result_code != 0:
