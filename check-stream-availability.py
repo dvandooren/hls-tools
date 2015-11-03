@@ -74,13 +74,12 @@ def render_date_iso8601():
     return timestamp
 # enddef render_date_iso8601()
 
-def print_brief(args, out_stream, *items):
+def print_brief(timestamp, out_stream, *items):
     output = ' '.join(map(str, items))
-    if args.verbose or args.timestamp:
+    if timestamp:
         print >> out_stream, render_date_iso8601(), output
     else:
         print >> out_stream, output
-
 # endef print_brief()
 
 # This function sets the return code only if the new code is worse
@@ -129,6 +128,9 @@ def main():
     """
     args = get_args()
 
+    if args.verbose:
+        args.timestamp = True
+
     urls = get_urls(args)
     result = (0, "OK")
     result_code = 0
@@ -150,20 +152,20 @@ def main():
 
                     if not args.verbose:
                         if result[0] == 0:
-                            print_brief(args, sys.stdout, "OK:", result[1])
+                            print_brief(args.timestamp, sys.stdout, "OK:", result[1])
                         elif result[0] == 1:
-                            print_brief(args, sys.stdout, "WARNING:", result[1])
+                            print_brief(args.timestamp, sys.stdout, "WARNING:", result[1])
                         else:
-                            print_brief(args, sys.stdout, "CRITICAL:", result[1])
+                            print_brief(args.timestamp, sys.stdout, "CRITICAL:", result[1])
 
                 else:
-                    print_brief(args, sys.stdout, "CRITICAL: URL=", url, ">> Does not contain any streams")
+                    print_brief(args.timestamp, sys.stdout, "CRITICAL: URL=", url, ">> Does not contain any streams")
                     result_code = 2
             except IOError as error:
-                print_brief(args, sys.stdout, "CRITICAL: URL=", url, ">>", error)
+                print_brief(args.timestamp, sys.stdout, "CRITICAL: URL=", url, ">>", error)
                 result_code = 2
         else:
-            print_brief(args, sys.stdout, "CRITICAL: URL=", url, ">> Not a valid URL")
+            print_brief(args.timestamp, sys.stdout, "CRITICAL: URL=", url, ">> Not a valid URL")
             result_code = 2
 
     if result_code != 0:
