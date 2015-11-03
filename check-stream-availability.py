@@ -29,6 +29,11 @@ def get_args():
                         default=False,
                         help='Display verbose output')
 
+    parser.add_argument('-t', '--timestamp',
+                        action='store_true',
+                        default=False,
+                        help='Display timestamp in the brief output')
+
     parser.add_argument('url',
                         nargs='?', default='NO_URL',
                         action='store',
@@ -136,29 +141,47 @@ def main():
 
                     if not args.verbose:
                         if result[0] == 0:
-                            print >> sys.stdout, "OK:", result[1]
+                            if args.timestamp:
+                                print >> sys.stdout, render_date_iso8601(), "OK:", result[1]
+                            else:
+                                print >> sys.stdout, "OK:", result[1]
                         elif result[0] == 1:
-                            print >> sys.stdout, "WARNING:", result[1]
+                            if args.timestamp:
+                                print >> sys.stdout, render_date_iso8601(), "WARNING:", result[1]
+                            else:
+                                print >> sys.stdout, "WARNING:", result[1]
                         else:
-                            print >> sys.stdout, "CRITICAL:", result[1]
+                            if args.timestamp:
+                                print >> sys.stdout, render_date_iso8601(), "CRITICAL:", result[1]
+                            else:
+                                print >> sys.stdout, "CRITICAL:", result[1]
 
                 else:
                     if args.verbose:
                         print >> sys.stdout, render_date_iso8601(), "CRITICAL: URL=", url, ">> Does not contain any streams"
                     else:
-                        print >> sys.stdout, "CRITICAL: URL=", url, ">> Does not contain any streams"
+                        if args.timestamp:
+                            print >> sys.stdout, render_date_iso8601(), "CRITICAL: URL=", url, ">> Does not contain any streams"
+                        else:
+                            print >> sys.stdout, "CRITICAL: URL=", url, ">> Does not contain any streams"
                     result_code = 2
             except IOError as error:
                 if args.verbose:
-                    print >> sys.stdout, render_date_iso8601(), "CRITICAL: URL=", url, ">>", error
+                    print >> sys.stdout, render_date_iso8601(), "CRITICAL:", render_date_iso8601(), "URL=", url, ">>", error
                 else:
-                    print >> sys.stdout, "CRITICAL: URL=", url, ">>", error
+                    if args.timestamp:
+                        print >> sys.stdout, render_date_iso8601(), "CRITICAL: URL=", url, ">>", error
+                    else:
+                        print >> sys.stdout, "CRITICAL: URL=", url, ">>", error
                 result_code = 2
         else:
             if args.verbose:
                 print >> sys.stdout, render_date_iso8601(), "CRITICAL: URL=", url, ">> Not a valid URL"
             else:
-                print >> sys.stdout, "CRITICAL: URL=", url, ">> Not a valid URL"
+                if args.timestamp:
+                    print >> sys.stdout, render_date_iso8601(), "CRITICAL: URL=", url, ">> Not a valid URL"
+                else:
+                    print >> sys.stdout, "CRITICAL: URL=", url, ">> Not a valid URL"
             result_code = 2
 
     if result_code != 0:
